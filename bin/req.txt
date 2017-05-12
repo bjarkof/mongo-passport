@@ -1,0 +1,7 @@
+{ _id: 59148056c6f3b54d04c8ccda,
+  lastName: 'sdflkdsf',
+  firstName: 'dfklsd',
+  email: 'dfkl@kdfl.dk',
+  password: '$2a$10$epvrIq/1/cY33HvK348yXuD.sVY2JDTy5kHozISrqhDrERb5psMHS',
+  username: 'hans',
+  __v: 0 }
