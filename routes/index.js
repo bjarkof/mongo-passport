@@ -11,10 +11,10 @@ var isAuthenticated = function (req, res, next) {
 	res.redirect('/');
 }
 
-module.exports = function(passport){
+module.exports = function (passport) {
 	/* GET login page. */
-	router.get('/', function(req, res) {
-    	// Display the Login page with any flash message, if any
+	router.get('/', function (req, res) {
+		// Display the Login page with any flash message, if any
 		res.render('index', { message: req.flash('message') });
 	});
 
@@ -22,64 +22,68 @@ module.exports = function(passport){
 	router.post('/login', passport.authenticate('login', {
 		successRedirect: '/home',
 		failureRedirect: '/',
-		failureFlash : true  
+		failureFlash: true
 	}));
 
 	/* GET Registration Page */
-	router.get('/signup', function(req, res){
-		res.render('register',{message: req.flash('message')});
+	router.get('/signup', function (req, res) {
+		res.render('register', { message: req.flash('message') });
 	});
 
 	/* Handle Registration POST */
 	router.post('/signup', passport.authenticate('signup', {
 		successRedirect: '/home',
 		failureRedirect: '/signup',
-		failureFlash : true  
+		failureFlash: true
 	}));
 
 	/* GET Home Page */
-	router.get('/home', isAuthenticated, function(req, res){
-		Post.find({}, function(err, posts) {
-			if(err) console.log(err);
-			res.render('home', { user: req.user, posts: posts || [] });
-			
-		});
+	router.get('/home', isAuthenticated, function (req, res) {
+		const query = Post.find({}).exec()
+			.then((posts) => {
+				res.render('home', { user: req.user, posts: posts || [] });
+			})
+			.catch((err) => {
+				console.log(err);
+			})
 	});
 
 	/* Handle Logout */
-	router.get('/signout', function(req, res) {
+	router.get('/signout', function (req, res) {
 		req.logout();
 		res.redirect('/');
 	});
 
-	router.post('/addpost', function(req, res) {
-		var newPost = new Post();
-		newPost.title = req.param('title');
-		newPost.body = req.param('body');
-		newPost.author = {
-			name: req.user.username,
-			id: req.user._id
-		};
-		newPost.authorId = req.user._id;
-		newPost.createdAt = Date.now();
-		newPost.save(function(err) {
-			if(err){
-				console.log('Error saving post', err);
-				throw err;
-			}
-			res.redirect('/home');
-		})
-	});
-	
-	router.post('/deletepost/:id', function(req, res) {
-		console.log('ID:', req.params.id);
-		Post.remove({_id: req.params.id}, function(err){
-			if(err) console.log(err);
-			res.redirect('/home');
+	router.post('/addpost', function (req, res) {
+		var newPost = new Post({
+			title: req.param('tilte'),
+			body: req.param('body'),
+			author: {
+				name: req.user.username,
+				id: req.user._id
+			},
+			createdAt: Date.now()
+
 		});
+
+		const promise = newPost.save()
+			.then(function (post) {
+				if (post) console.log(post)
+				res.redirect('/home');
+			});
 	});
 
-	
+	router.post('/deletepost/:id', function (req, res) {
+		const query = Post.findByIdAndRemove(req.params.id).exec()
+			.then((post) => {
+				res.redirect('/home');
+			})
+			.catch((err) => {
+				console.log(err);
+			})
+	});
+
+
 
 	return router;
 }
